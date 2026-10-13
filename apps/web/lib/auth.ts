@@ -1,5 +1,9 @@
 import { betterAuth } from "better-auth";
+import { nextCookies } from "better-auth/next-js";
+import { Pool } from "pg";
+import dotenv from "dotenv";
 
+dotenv.config();
 const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60;
 const DEVELOPMENT_ALLOWED_HOSTS = ["localhost:*", "127.0.0.1:*"];
 
@@ -9,6 +13,7 @@ function getAllowedHosts(): string[] {
   }
   const deploymentHosts = [
     process.env.VERCEL_URL,
+    "localhost:*", "127.0.0.1:*",
     process.env.VERCEL_BRANCH_URL,
     process.env.VERCEL_PROJECT_PRODUCTION_URL,
   ].filter((host): host is string => Boolean(host));
@@ -30,6 +35,9 @@ export const auth = betterAuth({
     allowedHosts: getAllowedHosts(),
     protocol: process.env.NODE_ENV === "development" ? "auto" : "https",
   },
+  database: new Pool({
+    connectionString: process.env.PG_CONNECTION_STRING,
+  }),
   secret: requireEnvironmentVariable("BETTER_AUTH_SECRET"),
   session: {
     expiresIn: SESSION_MAX_AGE_SECONDS,
@@ -47,5 +55,16 @@ export const auth = betterAuth({
       clientSecret: requireEnvironmentVariable("VERCEL_APP_CLIENT_SECRET"),
       scope: ["openid", "email", "profile"],
     },
+    google: {
+      clientId: requireEnvironmentVariable("GOOGLE_CLIENT_ID"),
+      clientSecret: requireEnvironmentVariable("GOOGLE_CLIENT_SECRET"),
+      scope: ["openid", "email", "profile"],
+    },
+    github: {
+      clientId: requireEnvironmentVariable("GITHUB_CLIENT_ID"),
+      clientSecret: requireEnvironmentVariable("GITHUB_CLIENT_SECRET"),
+      scope: ["openid", "email", "profile"],
+    },
   },
+  plugins: [ nextCookies() ],
 });

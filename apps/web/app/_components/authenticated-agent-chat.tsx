@@ -10,9 +10,9 @@ export async function AuthenticatedAgentChat({
   readonly sessionId?: string;
   readonly sessionless?: boolean;
 }) {
-  if (process.env.NODE_ENV === "development") {
-    return <AgentChat sessionId={sessionId} sessionless={sessionless} />;
-  }
+  // if (process.env.NODE_ENV === "development") {
+  //   return <AgentChat sessionId={sessionId} sessionless={sessionless} />;
+  // }
 
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return <SignIn />;

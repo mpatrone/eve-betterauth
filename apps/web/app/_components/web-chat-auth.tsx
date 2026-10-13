@@ -15,22 +15,48 @@ import { authClient } from "@/lib/auth-client";
 const AGENT_NAME = "eve-betterauth";
 
 export function SignIn() {
-  const [pending, setPending] = useState(false);
+  const [pendingGoogle, setPendingGoogle] = useState(false);
+  const [pendingVercel, setPendingVercel] = useState(false);
+  const [pendingGithub, setPendingGithub] = useState(false);
   const [error, setError] = useState<string>();
 
-  async function signIn() {
-    setPending(true);
+  async function signIn(provider:string) {
+    switch(provider) {
+      case "google":
+        setPendingGoogle(true);
+        break;
+      case "vercel":
+        setPendingVercel(true);
+        break;
+      case "github":
+        setPendingGithub(true);
+        break;
+    }
     setError(undefined);
+
     try {
       const result = await authClient.signIn.social({
         callbackURL: "/",
-        provider: "vercel",
+        provider: provider,
       });
       if (!result.error) return;
-      setPending(false);
+
+      switch(provider) {
+        case "google":
+          setPendingGoogle(false);
+          break;
+        case "vercel":
+          setPendingVercel(false);
+        break;
+      case "github":
+        setPendingGithub(false);
+        break;
+      }
       setError("Sign-in failed. Try again.");
     } catch {
-      setPending(false);
+      setPendingGoogle(false);
+      setPendingVercel(false);
+      setPendingGithub(false);
       setError("Sign-in failed. Try again.");
     }
   }
@@ -53,18 +79,22 @@ export function SignIn() {
             </span>
             <span>Sign in to start a session</span>
           </p>
-          <Button className="mt-3 w-full gap-2 text-sm" disabled={pending} onClick={signIn}>
-            <svg aria-hidden="true" className="size-3 fill-current" viewBox="0 0 24 20">
-              <path d="M12 0 24 20H0L12 0Z" />
-            </svg>
-            <span className="leading-5">{pending ? "Redirecting…" : "Continue with Vercel"}</span>
+          <Button className="mt-3 w-full gap-2 text-sm" disabled={pendingGoogle} onClick={() => signIn("google")}>
+            <span className="leading-5">{pendingGoogle ? "Redirecting…" : "Continue with Google"}</span>
           </Button>
+          <Button className="mt-3 w-full gap-2 text-sm" disabled={pendingVercel} onClick={() => signIn("vercel")}>
+            <span className="leading-5">{pendingVercel ? "Redirecting…" : "Continue with Vercel"}</span>
+          </Button>
+          <Button className="mt-3 w-full gap-2 text-sm" disabled={pendingGithub} onClick={() => signIn("github")}>
+            <span className="leading-5">{pendingGithub ? "Redirecting…" : "Continue with GitHub"}</span>
+          </Button>
+        </section>
+
           {error ? (
             <p className="text-destructive text-sm" role="alert">
               {error}
             </p>
           ) : null}
-        </section>
       </div>
     </main>
   );
