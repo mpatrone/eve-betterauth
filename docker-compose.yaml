@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:17
+    restart: always
+    volumes:
+      - my_pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=betterauth
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=po75558@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+
+volumes:
+  my_pgdata:
